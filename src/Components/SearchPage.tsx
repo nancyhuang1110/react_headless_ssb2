@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -9,19 +9,36 @@ import Pager from './Pager';
 import Sort from './Sort';
 import FacetList from './FacetList';
 import ResultsPerPage from './ResultsPerPage';
-import { SearchEngine } from '@coveo/headless';
-import { EngineProvider } from '../common/engineContext';
+import {EngineProvider} from '../common/engineContext';
+import {SearchEngine, loadQueryActions, loadSearchAnalyticsActions} from '@coveo/headless';
 
 interface ISearchPageProps {
   engine: SearchEngine;
 }
 
 const SearchPage: React.FunctionComponent<ISearchPageProps> = (props) => {
-  const { engine } = props;
+  const {engine} = props;
   useEffect(() => {
     engine.executeFirstSearch();
   }, [engine]);
+  const { updateQuery } = loadQueryActions(engine);
+  const {logSearchFromLink, logOmniboxFromLink} = loadSearchAnalyticsActions(engine);
+  const data = localStorage.getItem('coveo_standalone_search_box_data');
 
+  // const { value } = JSON.parse(data);
+  // engine.dispatch(updateQuery({ q: value }));
+if (data) {
+    localStorage.removeItem('coveo_standalone_search_box_data');
+
+    const {value, analytics} = JSON.parse(data);
+    const {cause, metadata} = analytics;
+
+    const event = cause === 'searchFromLink' ? logSearchFromLink() : logOmniboxFromLink(metadata);
+    engine.dispatch(updateQuery({q: value}));
+    engine.executeFirstSearch(event);
+} else {
+    engine.executeFirstSearch();
+}
   return (
     <EngineProvider value={engine}>
       <Container maxWidth="lg">

@@ -16,9 +16,12 @@ export const StandaloneSearchBox: FunctionComponent<StandaloneSearchBoxOptions> 
   if (!state) {
     return null;
   }
-
+  const {value, analytics} = controller.state
   if (state.redirectTo) {
     const { redirectTo } = state;
+    // const data = {value, analytics};
+    const data = {value, analytics};
+    localStorage.setItem('coveo_standalone_search_box_data', JSON.stringify(data));
     window.location.href = redirectTo;
     return null;
   }
