@@ -17,28 +17,20 @@ interface ISearchPageProps {
 }
 
 const SearchPage: React.FunctionComponent<ISearchPageProps> = (props) => {
-  const {engine} = props;
+  const { engine } = props;
   useEffect(() => {
-    engine.executeFirstSearch();
+    const { updateQuery } = loadQueryActions(engine);
+    const data = localStorage.getItem("coveo_standalone_search_box_data");
+    if (data) {
+      localStorage.removeItem("coveo_standalone_search_box_data");
+      const { value, analytics } = JSON.parse(data);
+      engine.dispatch(updateQuery({ q: value }));
+      engine.executeFirstSearchAfterStandaloneSearchBoxRedirect(analytics);
+    } else {
+      engine.executeFirstSearch();
+    }
   }, [engine]);
-  const { updateQuery } = loadQueryActions(engine);
-  const {logSearchFromLink, logOmniboxFromLink} = loadSearchAnalyticsActions(engine);
-  const data = localStorage.getItem('coveo_standalone_search_box_data');
 
-  // const { value } = JSON.parse(data);
-  // engine.dispatch(updateQuery({ q: value }));
-if (data) {
-    localStorage.removeItem('coveo_standalone_search_box_data');
-
-    const {value, analytics} = JSON.parse(data);
-    const {cause, metadata} = analytics;
-
-    const event = cause === 'searchFromLink' ? logSearchFromLink() : logOmniboxFromLink(metadata);
-    engine.dispatch(updateQuery({q: value}));
-    engine.executeFirstSearch(event);
-} else {
-    engine.executeFirstSearch();
-}
   return (
     <EngineProvider value={engine}>
       <Container maxWidth="lg">
