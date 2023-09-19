@@ -33,6 +33,8 @@ export const StandaloneSearchBox: FunctionComponent<StandaloneSearchBoxOptions> 
         onChange={(e) => controller.updateText(e.target.value)}
         onKeyDown={(e) => isEnterKey(e) && controller.submit()}
       />
+      <div onClick={() => controller.submit()}>Click to Search</div>
+      <button onClick={() => controller.submit()}>Click to Search</button>
       <ul>
         {state.suggestions.map((suggestion) => {
           const value = suggestion.rawValue;
